@@ -5,19 +5,13 @@
 type CandidateDto {
   slug: String!
 
-  """
-  Nome de urna.
-  """
+  """Nome de urna."""
   name: String!
 
-  """
-  Nome completo registrado no TSE.
-  """
+  """Nome completo registrado no TSE."""
   fullName: String!
 
-  """
-  Foto oficial da candidatura (TSE).
-  """
+  """Foto oficial da candidatura (TSE)."""
   photoUrl: String
   party: String!
   ballotNumber: Int!
@@ -32,9 +26,7 @@ type BallotOptionDto {
   color: String!
 }
 
-"""
-Candidato, voto em branco ou voto nulo.
-"""
+"""Candidato, voto em branco ou voto nulo."""
 enum BallotOptionKind {
   CANDIDATE
   BLANK
@@ -51,28 +43,20 @@ type GetCandidatesQueryResponseDto {
 type CandidateResultDto {
   slug: String!
 
-  """
-  Nome de urna.
-  """
+  """Nome de urna."""
   name: String!
 
-  """
-  Nome completo registrado no TSE.
-  """
+  """Nome completo registrado no TSE."""
   fullName: String!
 
-  """
-  Foto oficial da candidatura (TSE).
-  """
+  """Foto oficial da candidatura (TSE)."""
   photoUrl: String
   party: String!
   ballotNumber: Int!
   color: String!
   votes: Int!
 
-  """
-  Percentual dos votos válidos (0–100), como no TSE.
-  """
+  """Percentual dos votos válidos (0–100), como no TSE."""
   percentage: Float!
 }
 
@@ -80,21 +64,15 @@ type StateCandidateResultDto {
   slug: String!
   votes: Int!
 
-  """
-  Percentual dos votos válidos.
-  """
+  """Percentual dos votos válidos."""
   percentage: Float!
 }
 
 type StateResultDto {
-  """
-  Todos os votos, incluindo brancos e nulos.
-  """
+  """Todos os votos, incluindo brancos e nulos."""
   totalVotes: Int!
 
-  """
-  Votos em candidatos.
-  """
+  """Votos em candidatos."""
   validVotes: Int!
   blankVotes: Int!
   nullVotes: Int!
@@ -103,26 +81,18 @@ type StateResultDto {
 }
 
 type ElectionResultsDto {
-  """
-  Todos os votos, incluindo brancos e nulos.
-  """
+  """Todos os votos, incluindo brancos e nulos."""
   totalVotes: Int!
 
-  """
-  Votos em candidatos.
-  """
+  """Votos em candidatos."""
   validVotes: Int!
   blankVotes: Int!
   nullVotes: Int!
 
-  """
-  Brancos sobre o total de votos (%).
-  """
+  """Brancos sobre o total de votos (%)."""
   blankPercentage: Float!
 
-  """
-  Nulos sobre o total de votos (%).
-  """
+  """Nulos sobre o total de votos (%)."""
   nullPercentage: Float!
   votingOpen: Boolean!
 
@@ -133,9 +103,7 @@ type ElectionResultsDto {
   updatedAt: String!
   candidates: [CandidateResultDto!]!
 
-  """
-  Opções além dos candidatos: voto em branco e voto nulo.
-  """
+  """Opções além dos candidatos: voto em branco e voto nulo."""
   otherOptions: [BallotOptionDto!]!
   states: [StateResultDto!]!
 }
@@ -153,43 +121,29 @@ type CandidateStatesWonDto {
 }
 
 type AnalyticsSummaryDto {
-  """
-  Todos os votos, incluindo brancos e nulos.
-  """
+  """Todos os votos, incluindo brancos e nulos."""
   totalVotes: Int!
 
-  """
-  Votos em candidatos.
-  """
+  """Votos em candidatos."""
   validVotes: Int!
   blankVotes: Int!
   nullVotes: Int!
 
-  """
-  Brancos sobre o total do recorte (%).
-  """
+  """Brancos sobre o total do recorte (%)."""
   blankPercentage: Float!
 
-  """
-  Nulos sobre o total do recorte (%).
-  """
+  """Nulos sobre o total do recorte (%)."""
   nullPercentage: Float!
 
-  """
-  Votos no Brasil inteiro, no mesmo período.
-  """
+  """Votos no Brasil inteiro, no mesmo período."""
   nationalVotes: Int!
 
-  """
-  Peso do recorte no total nacional (%).
-  """
+  """Peso do recorte no total nacional (%)."""
   shareOfNational: Float!
   leaderSlug: String
   marginVotes: Int!
 
-  """
-  Vantagem em pontos percentuais.
-  """
+  """Vantagem em pontos percentuais."""
   marginPoints: Float!
   statesWon: [CandidateStatesWonDto!]!
   tiedStates: Int!
@@ -197,14 +151,10 @@ type AnalyticsSummaryDto {
 }
 
 type RegionAnalyticsDto {
-  """
-  Todos os votos, incluindo brancos e nulos.
-  """
+  """Todos os votos, incluindo brancos e nulos."""
   totalVotes: Int!
 
-  """
-  Votos em candidatos.
-  """
+  """Votos em candidatos."""
   validVotes: Int!
   blankVotes: Int!
   nullVotes: Int!
@@ -215,9 +165,7 @@ type RegionAnalyticsDto {
   marginPoints: Float!
 }
 
-"""
-Regiões geográficas do IBGE.
-"""
+"""Regiões geográficas do IBGE."""
 enum BrazilianRegion {
   NORTE
   NORDESTE
@@ -227,23 +175,17 @@ enum BrazilianRegion {
 }
 
 type StateAnalyticsDto {
-  """
-  Todos os votos, incluindo brancos e nulos.
-  """
+  """Todos os votos, incluindo brancos e nulos."""
   totalVotes: Int!
 
-  """
-  Votos em candidatos.
-  """
+  """Votos em candidatos."""
   validVotes: Int!
   blankVotes: Int!
   nullVotes: Int!
   state: String!
   region: BrazilianRegion!
 
-  """
-  Peso do estado no recorte (%).
-  """
+  """Peso do estado no recorte (%)."""
   shareOfSlice: Float!
   candidates: [StateCandidateResultDto!]!
   leaderSlug: String
@@ -254,29 +196,21 @@ type StateAnalyticsDto {
 type TimelineCandidateDto {
   slug: String!
 
-  """
-  Votos dentro do intervalo.
-  """
+  """Votos dentro do intervalo."""
   votes: Int!
   cumulativeVotes: Int!
 
-  """
-  Percentual acumulado dos válidos.
-  """
+  """Percentual acumulado dos válidos."""
   cumulativePercentage: Float!
 }
 
 type TimelinePointDto {
-  """
-  Início do intervalo (ISO 8601, UTC).
-  """
+  """Início do intervalo (ISO 8601, UTC)."""
   at: String!
   totalVotes: Int!
   cumulativeTotal: Int!
 
-  """
-  Votos válidos acumulados.
-  """
+  """Votos válidos acumulados."""
   cumulativeValid: Int!
   candidates: [TimelineCandidateDto!]!
 }
@@ -308,9 +242,7 @@ type CastVoteResponseDto {
   candidateSlug: String!
   state: String!
 
-  """
-  Momento do registro, segundo o servidor (ISO 8601).
-  """
+  """Momento do registro, segundo o servidor (ISO 8601)."""
   votedAt: String!
 }
 
@@ -321,48 +253,69 @@ type CastVoteMutationResponseDto {
   data: CastVoteResponseDto!
 }
 
+type VoterDto {
+  name: String!
+  email: String!
+  pictureUrl: String
+
+  """Se esta conta já registrou um voto."""
+  hasVoted: Boolean!
+}
+
+type SignInWithGoogleResponseDto {
+  """Sessão; o BFF a guarda num cookie httpOnly."""
+  sessionToken: String!
+
+  """Expiração da sessão (ISO 8601)."""
+  expiresAt: String!
+  voter: VoterDto!
+}
+
+type SignInWithGoogleMutationResponseDto {
+  success: Boolean!
+  message: String
+  code: String
+  data: SignInWithGoogleResponseDto!
+}
+
+type CurrentVoterQueryResponseDto {
+  success: Boolean!
+  message: String
+  code: String
+
+  """Nulo quando não há sessão válida."""
+  data: VoterDto
+}
+
 type Query {
   candidates: GetCandidatesQueryResponseDto!
-  electionAnalytics(
-    filter: ElectionAnalyticsFilterInput
-  ): ElectionAnalyticsQueryResponseDto!
+  electionAnalytics(filter: ElectionAnalyticsFilterInput): ElectionAnalyticsQueryResponseDto!
+  currentVoter: CurrentVoterQueryResponseDto!
   electionResults: ElectionResultsQueryResponseDto!
 }
 
 input ElectionAnalyticsFilterInput {
   region: BrazilianRegion
 
-  """
-  UFs. Combinado com `region`, vale a interseção.
-  """
+  """UFs. Combinado com `region`, vale a interseção."""
   states: [String!]
 
-  """
-  Início do período (ISO 8601 com fuso).
-  """
+  """Início do período (ISO 8601 com fuso)."""
   from: String
 
-  """
-  Fim do período (ISO 8601 com fuso).
-  """
+  """Fim do período (ISO 8601 com fuso)."""
   to: String
 
-  """
-  Somente estados em que este candidato lidera.
-  """
+  """Somente estados em que este candidato lidera."""
   leaderSlug: String
 
-  """
-  Somente estados com pelo menos N votos.
-  """
+  """Somente estados com pelo menos N votos."""
   minVotes: Int
   sortBy: StateSortField
   sortCandidateSlug: String
   order: SortOrder
 
-  """
-  Padrão automático: hora até 72h de período, dia acima disso.
-  """
+  """Padrão automático: hora até 72h de período, dia acima disso."""
   granularity: TimelineGranularity
 }
 
@@ -380,21 +333,19 @@ enum SortOrder {
 
 type Mutation {
   castVote(input: CastVoteInputDto!): CastVoteMutationResponseDto!
+  signInWithGoogle(input: SignInWithGoogleInputDto!): SignInWithGoogleMutationResponseDto!
 }
 
 input CastVoteInputDto {
-  cpf: String!
-
-  """
-  Data de nascimento no formato YYYY-MM-DD.
-  """
-  birthDate: String!
   candidateSlug: String!
   state: String!
 
-  """
-  Aceite do aviso de privacidade (LGPD).
-  """
+  """Aceite do aviso de privacidade (LGPD)."""
   privacyConsent: Boolean!
   captchaToken: String
+}
+
+input SignInWithGoogleInputDto {
+  """ID token (credential) devolvido pelo botão do Google."""
+  idToken: String!
 }
