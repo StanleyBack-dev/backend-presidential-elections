@@ -22,7 +22,9 @@ Gere segredos com `node -e "console.log(require('crypto').randomBytes(48).toStri
 | `candidates`        | Query    | Candidatos                                                       |
 | `electionResults`   | Query    | Totais, % sobre válidos, brancos/nulos e votos por estado        |
 | `electionAnalytics` | Query    | Análise com filtros (região, estados, período, líder, ordenação) |
-| `castVote`          | Mutation | Registra um voto (candidato, branco ou nulo)                     |
+| `signInWithGoogle`  | Mutation | Valida o ID token do Google e devolve a sessão do eleitor        |
+| `currentVoter`      | Query    | Quem está conectado e se já votou (sessão via `Authorization`)   |
+| `castVote`          | Mutation | Registra o voto (candidato, branco ou nulo) da conta conectada   |
 
 ### Filtros de `electionAnalytics`
 
@@ -45,24 +47,28 @@ Todos opcionais e combináveis, aplicados em memória sobre uma única contagem 
 - **Branco e nulo** são opções da cédula. Como no TSE, contam no total, mas o percentual dos candidatos é calculado sobre os **votos válidos**.
 - **Encerramento:** `VOTING_CLOSES_AT` (padrão `2026-10-25T17:00:00-03:00`). É um instante único para todo o país (horário unificado de Brasília); depois dele, votos são recusados. Sempre informe o fuso.
 
-## Validação do CPF
+## Login com Google
 
-Nenhum órgão do governo oferece API **gratuita** para confirmar que um CPF existe (a do SERPRO é paga). A verificação é plugável via `CPF_VERIFICATION_PROVIDER`:
+Cada conta Google vota uma única vez. O frontend mostra o botão oficial do Google na hora de votar; o ID token recebido vai para `signInWithGoogle`, que confere assinatura, validade, _audience_ (`GOOGLE_CLIENT_ID`) e e-mail verificado, e devolve uma sessão (JWT HS256 assinado com `SESSION_SECRET`, válido por `SESSION_TTL_SECONDS`). O BFF guarda essa sessão num cookie httpOnly e a envia como `Authorization: Bearer` em `currentVoter` e `castVote`.
 
-- `local`: só dígitos verificadores. Sem custo, mas aceita CPFs gerados.
-- `cpfhub`: [CPFHub.io](https://www.cpfhub.io) confirma que o CPF existe **e** que a data de nascimento bate (50 consultas grátis; só cobra quando o CPF é encontrado).
+**Configuração no Google Cloud Console** (gratuito):
 
-Outro provedor: implemente `CpfVerificationProvider` em `src/modules/cpf-verification/providers/` e registre-o em `cpf-verification.module.ts`.
+1. _APIs e serviços → Tela de permissão OAuth_: tipo **Externo**, escopos padrão (`openid`, `email`, `profile`) e status **Em produção**, para qualquer conta Google poder entrar.
+2. _Credenciais → Criar credenciais → ID do cliente OAuth → Aplicativo da Web_.
+3. **Origens JavaScript autorizadas:** `http://localhost:5173` e o domínio de produção (com e sem `www`, se usar os dois). Não é preciso URI de redirecionamento.
+4. Use o ID do cliente em `GOOGLE_CLIENT_ID` (backend) e `VITE_GOOGLE_CLIENT_ID` (frontend).
+
+> A primeira versão validava por CPF. A coluna `tb_voters.cpf_hash` foi mantida (sem novas gravações) para que votos já registrados continuem contando.
 
 ## Segurança e privacidade
 
-- **Um voto por CPF:** `UNIQUE` sobre o hash do CPF, gravado na mesma transação do voto (resiste a requisições simultâneas).
-- **CPF nunca armazenado:** só HMAC-SHA256 com chave secreta (`CPF_HASH_SECRET`); um hash comum seria revertido por força bruta (~10⁹ CPFs). A data de nascimento não é armazenada.
+- **Um voto por conta Google:** `UNIQUE` sobre o hash da conta, gravado na mesma transação do voto (resiste a requisições simultâneas).
+- **Nenhum dado pessoal armazenado:** só o HMAC-SHA256 do id da conta (`sub`) com chave secreta (`CPF_HASH_SECRET`, nome mantido da versão com CPF). Nome e e-mail ficam apenas na sessão, nunca no banco.
 - **Voto secreto:** `tb_voters` (quem votou) e `tb_votes` (em quem) não têm ligação; o voto guarda só a hora truncada.
-- **Rate limit** compartilhado entre instâncias (Postgres) e **bloqueio** após 5 falhas por IP e por CPF.
+- **Rate limit** compartilhado entre instâncias (Postgres) e limites próprios para login e voto.
 - **Anti-robô:** Cloudflare Turnstile, obrigatório em produção.
 - **API fechada:** em produção só aceita chamadas do BFF (`INTERNAL_API_SECRET`). IPs só como HMAC.
-- **Hardening:** helmet, corpo limitado a 10 KB, whitelist de campos, introspecção desligada em produção, erros internos não vazam, CPFs redigidos de logs.
+- **Hardening:** helmet, corpo limitado a 10 KB, whitelist de campos, introspecção desligada em produção, erros internos não vazam, e-mails e tokens redigidos de logs.
 
 ## Migrations
 
@@ -73,6 +79,6 @@ Rodam no boot (local e produção) por `MigrationsRunnerService`, numa única tr
 O workflow `deploy.yml` publica após o CI passar na `master`.
 
 - **Secrets do GitHub:** `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
-- **Variáveis de ambiente na Vercel:** `NODE_ENV=production`, `DATABASE_URL`, `FRONTEND_URL`, `CPF_HASH_SECRET`, `INTERNAL_API_SECRET`, `TURNSTILE_SECRET_KEY`, `CPF_VERIFICATION_PROVIDER`, `CPFHUB_API_KEY` (se usar `cpfhub`) e `DB_SSL=true`.
+- **Variáveis de ambiente na Vercel:** `NODE_ENV=production`, `DATABASE_URL`, `FRONTEND_URL`, `CPF_HASH_SECRET`, `INTERNAL_API_SECRET`, `SESSION_SECRET`, `GOOGLE_CLIENT_ID`, `TURNSTILE_SECRET_KEY` e `DB_SSL=true`.
 
 > ⚠️ `CPF_HASH_SECRET` nunca deve mudar depois que a votação começar: isso apagaria o controle de quem já votou.

@@ -32,7 +32,9 @@ export const envValidationSchema = Joi.object({
   TYPEORM_LOGGING: Joi.boolean().truthy("true").falsy("false").default(false),
 
   // === SEGURANÇA ===
-  // Pepper for the HMAC that turns CPFs and IPs into irreversible hashes.
+  // Pepper for the HMAC that turns Google account ids and IPs into
+  // irreversible hashes (named after the CPF, which the first release used;
+  // kept so existing deployments and their voter registry stay valid).
   // Rotating it invalidates the "already voted" registry — never change it
   // once the poll is live.
   CPF_HASH_SECRET: deployedSecret(
@@ -44,24 +46,28 @@ export const envValidationSchema = Joi.object({
     "dev-internal-api-secret-change-me-presidential-2026",
   ),
 
+  // Signs voter sessions (JWT kept by the BFF in an httpOnly cookie).
+  // Rotating it only signs everyone out.
+  SESSION_SECRET: deployedSecret(
+    "dev-session-secret-change-me-presidential-2026",
+  ),
+  SESSION_TTL_SECONDS: Joi.number().integer().min(300).default(86400),
+
+  // === LOGIN COM GOOGLE ===
+  // Google Cloud Console > Credenciais > ID do cliente OAuth (Aplicativo da
+  // Web). Público por natureza; o mesmo valor vai no VITE_GOOGLE_CLIENT_ID.
+  GOOGLE_CLIENT_ID: Joi.string().when("NODE_ENV", {
+    is: isDeployed,
+    then: Joi.required(),
+    otherwise: Joi.optional().allow(""),
+  }),
+
   // === CAPTCHA (Cloudflare Turnstile) ===
   TURNSTILE_SECRET_KEY: Joi.string().when("NODE_ENV", {
     is: isDeployed,
     then: Joi.required(),
     otherwise: Joi.optional().allow(""),
   }),
-
-  // === VERIFICAÇÃO DE CPF ===
-  CPF_VERIFICATION_PROVIDER: Joi.string()
-    .valid("local", "cpfhub")
-    .default("local"),
-  CPFHUB_API_KEY: Joi.string().when("CPF_VERIFICATION_PROVIDER", {
-    is: "cpfhub",
-    then: Joi.required(),
-    otherwise: Joi.optional().allow(""),
-  }),
-  CPFHUB_BASE_URL: Joi.string().uri().default("https://api.cpfhub.io"),
-  CPF_VERIFICATION_TIMEOUT_MS: Joi.number().integer().min(1000).default(8000),
 
   // === VOTAÇÃO ===
   VOTING_OPEN: Joi.boolean().truthy("true").falsy("false").default(true),
@@ -86,7 +92,4 @@ export const envValidationSchema = Joi.object({
   RATE_LIMIT_DEFAULT_LIMIT: Joi.number().integer().min(1).default(120),
   RATE_LIMIT_VOTE_TTL: Joi.number().integer().min(1).default(600),
   RATE_LIMIT_VOTE_LIMIT: Joi.number().integer().min(1).default(10),
-  // Failed identity checks (bad CPF, wrong birth date) before a lockout.
-  VOTE_FAILURE_MAX_ATTEMPTS: Joi.number().integer().min(1).default(5),
-  VOTE_FAILURE_LOCK_SECONDS: Joi.number().integer().min(60).default(1800),
 });

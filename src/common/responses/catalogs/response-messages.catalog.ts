@@ -1,4 +1,14 @@
 export const RESPONSE_MESSAGES = {
+  auth: {
+    signedIn: {
+      code: "AUTH_SIGNED_IN",
+      message: "Conta Google conectada.",
+    },
+    currentVoter: {
+      code: "AUTH_CURRENT_VOTER",
+      message: "Sessão carregada.",
+    },
+  },
   candidates: {
     listed: {
       code: "CANDIDATES_LISTED",

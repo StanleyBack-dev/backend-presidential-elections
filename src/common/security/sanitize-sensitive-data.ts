@@ -13,6 +13,7 @@ const SENSITIVE_KEYWORDS = [
   "passwd",
   "jwt",
   "cpf",
+  "email",
   "birthdate",
   "captcha",
 ] as const;
@@ -27,6 +28,7 @@ function sanitizeString(value: string): string {
     value
       // CPFs, formatted (000.000.000-00) or bare (11 digits).
       .replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g, REDACTED_VALUE)
+      .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, REDACTED_VALUE)
       .replace(/(bearer\s+)[a-z0-9\-._~+/]+=*/gi, `$1${REDACTED_VALUE}`)
       .replace(
         /(password|token|authorization|cookie|secret|api[_-]?key)\s*[:=]\s*[^\s,;]+/gi,

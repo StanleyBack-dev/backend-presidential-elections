@@ -321,11 +321,54 @@ type CastVoteMutationResponseDto {
   data: CastVoteResponseDto!
 }
 
+type VoterDto {
+  name: String!
+  email: String!
+  pictureUrl: String
+
+  """
+  Se esta conta já registrou um voto.
+  """
+  hasVoted: Boolean!
+}
+
+type SignInWithGoogleResponseDto {
+  """
+  Sessão; o BFF a guarda num cookie httpOnly.
+  """
+  sessionToken: String!
+
+  """
+  Expiração da sessão (ISO 8601).
+  """
+  expiresAt: String!
+  voter: VoterDto!
+}
+
+type SignInWithGoogleMutationResponseDto {
+  success: Boolean!
+  message: String
+  code: String
+  data: SignInWithGoogleResponseDto!
+}
+
+type CurrentVoterQueryResponseDto {
+  success: Boolean!
+  message: String
+  code: String
+
+  """
+  Nulo quando não há sessão válida.
+  """
+  data: VoterDto
+}
+
 type Query {
   candidates: GetCandidatesQueryResponseDto!
   electionAnalytics(
     filter: ElectionAnalyticsFilterInput
   ): ElectionAnalyticsQueryResponseDto!
+  currentVoter: CurrentVoterQueryResponseDto!
   electionResults: ElectionResultsQueryResponseDto!
 }
 
@@ -380,15 +423,12 @@ enum SortOrder {
 
 type Mutation {
   castVote(input: CastVoteInputDto!): CastVoteMutationResponseDto!
+  signInWithGoogle(
+    input: SignInWithGoogleInputDto!
+  ): SignInWithGoogleMutationResponseDto!
 }
 
 input CastVoteInputDto {
-  cpf: String!
-
-  """
-  Data de nascimento no formato YYYY-MM-DD.
-  """
-  birthDate: String!
   candidateSlug: String!
   state: String!
 
@@ -397,4 +437,11 @@ input CastVoteInputDto {
   """
   privacyConsent: Boolean!
   captchaToken: String
+}
+
+input SignInWithGoogleInputDto {
+  """
+  ID token (credential) devolvido pelo botão do Google.
+  """
+  idToken: String!
 }
